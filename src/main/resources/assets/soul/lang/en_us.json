@@ -1,0 +1,12 @@
+{
+  "item.soul.soul_ingot":"Soul Ingot",
+
+  "key.category.soul.soul": "Soul Keys",
+  "key.soul.gaining_soul": "gaining souls",
+
+
+  "text.my_mod.time": "Time: %d",
+  "gui.examplemod.examplebutton": "Hello",
+  "item.soul.raccoon_spawn_egg": "Raccoon Spawn Egg"
+
+}
