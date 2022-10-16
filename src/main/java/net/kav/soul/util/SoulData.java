@@ -3,6 +3,7 @@ package net.kav.soul.util;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.kav.soul.data.ItemType;
 import net.kav.soul.mixin.ModEntityDataSaverMixin;
 //import net.kav.soul.networking.ModMessages;
 import net.kav.soul.networking.ModMessages;
@@ -23,13 +24,22 @@ public class SoulData {
     private static int Insanity;
     private static  int Random;
 
-
+    private static int Health;
+    private static int Strength;
+    private static int dex;
+    private static int Intelligence;
+    private static float Stamina;
+    private static int ItemType;
+    private static float MaxStamina=20;
     public static int addNbtPoints(IEntityDataSaver player, int amount,String string)
     {
         NbtCompound nbt = player.getPersistentData();
         soul=nbt.getInt("soul");
         Intimidation_factor = nbt.getInt("Intimidation_factor");
         Insanity= nbt.getInt("Insanity");
+        Stamina=nbt.getFloat("Stamina");
+        MaxStamina=nbt.getFloat("Stamina_re");
+        ItemType= nbt.getInt("ItemType");
 
         switch (string)
         {
@@ -59,12 +69,83 @@ public class SoulData {
                 }
                 nbt.putInt("Insanity",Insanity);
                 return Insanity;
+            case "ItemType":
+                ItemType =amount;
+                nbt.putInt("ItemType",ItemType);
+                GlobalSoul.setItemtype(amount);
+                return ItemType;
                 //do nothing for now
             default:
                 return 0;
         }
     }
 
+    public static float addFloatpoint(IEntityDataSaver player,float amount, String string)
+    {
+        NbtCompound nbt = player.getPersistentData();
+        Stamina=nbt.getFloat("Stamina");
+        MaxStamina=nbt.getFloat("Stamina_re");
+        //Stamina=10;
+
+        switch (string) {
+            case "Stamina":
+
+                if (Stamina >= MaxStats.getMaxstamina()) {
+                    Stamina = MaxStats.getMaxstamina();
+                }else
+                {
+                    Stamina = Stamina + amount;
+                }
+                nbt.putFloat("Stamina", Stamina);
+                GlobalSoul.setStamina(Stamina);
+                return Stamina;
+
+            case "MaxStamina":
+                if(MaxStamina>99)
+                {
+                    MaxStamina=99;
+                }
+                else
+                {MaxStamina = MaxStamina + amount;}
+                nbt.putFloat("MaxStamina", MaxStamina);
+
+                MaxStats.setMaxstamina(MaxStamina);
+                return MaxStamina;
+            //do nothing for now
+            default:
+                return 2;
+        }
+    }
+
+    public static float removeFloatpoint(IEntityDataSaver player,float amount, String string)
+    {
+        NbtCompound nbt = player.getPersistentData();
+        Stamina=nbt.getFloat("Stamina");
+        Stamina=nbt.getFloat("Stamina");
+        MaxStamina=nbt.getFloat("Stamina_re");
+
+
+        switch (string) {
+            case "Stamina":
+
+               if (Stamina<=0) {
+                    Stamina=0;
+
+                }
+               else
+               {Stamina = Stamina - amount;}
+
+                GlobalSoul.setStamina(Stamina);
+            nbt.putFloat("Stamina", Stamina);
+             //  synSoul(Stamina, (ServerPlayerEntity) player);
+            return Stamina;
+            // synSoul(soul, (ServerPlayerEntity) player);
+
+            //do nothing for now
+            default:
+                return -1000;
+        }
+    }
 
     public static int removeNbtPoints(IEntityDataSaver player, int amount,String string)
     {
@@ -83,7 +164,7 @@ public class SoulData {
                     soul = soul - amount;
                 }
                 nbt.putInt("soul", soul);
-               //synSoul(soul, (ServerPlayerEntity) player);
+
                 return soul;
             case "Intimidation_factor" :
                 if (Intimidation_factor <0) {
@@ -169,57 +250,10 @@ public class SoulData {
     }
 
 
-    // public static int addsoul(IEntityDataSaver player, int amount) {
-    //        NbtCompound nbt = player.getPersistentData();
-    //        int soul = nbt.getInt("soul");
-    //
-    //        if (soul >= 9999999) {
-    //            soul = 9999999;
-    //        } else {
-    //            soul = soul + amount;
-    //        }
-    //        synSoul(soul, ((ServerPlayerEntity) player));
-    //        nbt.putInt("soul", soul);
-    //
-    //        return soul;
-    //
-    //    }
-
-    //public static void setsoul(IEntityDataSaver player,int a)
-    //    {
-    //        NbtCompound nbt = player.getPersistentData();
-    //        int soul = nbt.getInt("soul");
-    //        soul=0;
-    //
-    //
-    //
-    //
-    //        synSoul(soul, ((ServerPlayerEntity) player));
-    //        nbt.putInt("soul", soul);
-    //    }
-
-    public static void synSoul(int soul, ServerPlayerEntity player)
-    {
-        PacketByteBuf buffer = PacketByteBufs.create();
-        buffer.writeInt(soul);
-
-       ServerPlayNetworking.send(player, ModMessages.EXAMPLE_ID, buffer);
-    }
 
 
 
 
-   //public static void setsoul(IEntityDataSaver player,int a)
-    //    {
-    //        NbtCompound nbt = player.getPersistentData();
-    //        int soul = nbt.getInt("soul");
-    //        soul=0;
-    //
-    //
-    //
-    //
-    //        synSoul(soul, ((ServerPlayerEntity) player));
-    //        nbt.putInt("soul", soul);
-    //    }
+
 
 }

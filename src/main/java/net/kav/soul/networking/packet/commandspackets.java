@@ -18,13 +18,29 @@ public class commandspackets {
 
     public static void commands(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender)
     {
+        String playerstr = player.getName().getString();
+        String receive = buf.readString();
 
+        String give ="give";
+        String space = " ";
 
+        String finals= give+space+playerstr+space+receive;
 
+        //System.out.println(finals);
 
-
+        player.sendMessage(Text.of(finals),true);
         //items receives and removes souls after getting the items
-        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"kill");
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),finals);
+
+    }
+
+
+    public static void commandsta(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender)
+    {
+        String xa= player.getName().getString();
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"effect give "+xa+" minecraft:weakness 4 3 ");
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"effect give "+xa+" minecraft:mining_fatigue 4 3");
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"effect give "+xa+" minecraft:slowness 2 10");
 
     }
 }

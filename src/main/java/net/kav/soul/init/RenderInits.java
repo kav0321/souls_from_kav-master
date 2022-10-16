@@ -10,7 +10,7 @@ public class RenderInits {
 
 
         public static final Identifier GUI_ICONS = new Identifier("soul:textures/soul/soul_display.png");
-        public static final boolean isInventorioLoaded = FabricLoader.getInstance().isModLoaded("inventorio");
+
 
 
 

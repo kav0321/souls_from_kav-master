@@ -12,6 +12,10 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.CommandOutput;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -26,6 +30,7 @@ public class PlayerStatsServer {
 
 
         (((IEntityDataSaver) client.player)).getPersistentData().putInt("random",buf.readInt());
+
       //  (((IEntityDataSaver) client.player)).getPersistentData().putInt("Intimidation_factor",buf.readInt());
         //(((IEntityDataSaver) client.player)).getPersistentData().putInt("Insanity",buf.readInt());
 
@@ -43,13 +48,44 @@ public class PlayerStatsServer {
     //        //SoulData.synSoul(((IEntityDataSaver) client.player).getPersistentData().getInt("soul"), (ServerPlayerEntity) client.player);
     //    }
 
-    public static void send(ServerPlayerEntity player, Identifier channelName,PacketByteBuf buf)
+
+    public static void sendstats(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender)
     {
-        SoulData.synSoul(((IEntityDataSaver) player).getPersistentData().getInt("soul"), (ServerPlayerEntity) player);
-        //SoulData.addNbtPoints(((IEntityDataSaver) player),1,"soul");
-        //player.sendMessage(Text.of("soul"+ ((IEntityDataSaver) player).getPersistentData().getInt("soul")),true);
+
+        float x=buf.readFloat();
+        (((IEntityDataSaver) player)).getPersistentData().putFloat("soul",x);
+       // player.sendMessage(Text.of(Float.toString(x)),true);
+
     }
 
+    public static void getsta(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender)
+    {
+
+        float x=buf.readFloat();
+        SoulData.addFloatpoint(((IEntityDataSaver) player),x,"Stamina");
+        //player.sendMessage(Text.of(Float.toString(x)),true);
+
+    }
+
+
+    public static void sendswing(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender)
+    {
+
+        float x=buf.readFloat();
+
+        SoulData.removeFloatpoint(((IEntityDataSaver) player),x,"Stamina");
+
+    }
+
+    public static void geteffecs(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender)
+    {
+
+        String xa= buf.readString();
+
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"effect give "+xa+" minecraft:weakness 4 3 ");
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"effect give "+xa+" minecraft:mining_fatigue 4 3");
+        server.getCommandManager().execute(new ServerCommandSource(CommandOutput.DUMMY,player.getPos(),player.getRotationClient(), player.getWorld(),4,"", Text.of("k"), server,player),"effect give "+xa+" minecraft:slowness 2 10");
+    }
 
 
 }

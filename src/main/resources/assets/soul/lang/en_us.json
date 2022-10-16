@@ -3,7 +3,7 @@
 
   "key.category.soul.soul": "Soul Keys",
   "key.soul.gaining_soul": "gaining souls",
-
+"soul.require": "Souls require:",
 
   "text.my_mod.time": "Time: %d",
   "gui.examplemod.examplebutton": "Hello",

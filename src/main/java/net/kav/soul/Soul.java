@@ -1,19 +1,21 @@
 package net.kav.soul;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.kav.soul.config.ModConfigs;
 import net.kav.soul.event.*;
 import net.kav.soul.item.Moditems;
 //import net.kav.soul.networking.ModMessages;
 
 import net.kav.soul.networking.ModMessages;
 import net.kav.soul.util.ModRegistries;
+import net.kav.soul.util.PlayerStatsData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.bernie.geckolib3.GeckoLib;
 
 public class Soul implements ModInitializer {
 	public static final String MOD_ID ="soul";
@@ -25,10 +27,13 @@ public class Soul implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		Moditems.registerModItems();
-
+		ModConfigs.registerConfigs();
 	   ModMessages.registerC2SPackets();
 
-
+		//ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new ItemLoader());
+	Miss.Miss.register(new MissOveride());
+		ServerTickEvents.END_SERVER_TICK.register(new serverevent());
+		//Playeraction.EVENT.register(new PlayerSwing());
 		ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register(new EntityDeath());
 		ServerPlayerEvents.AFTER_RESPAWN.register(new PlayerDeath());
 		//ServerPlayConnectionEvents.JOIN.register(new ServerStart());
@@ -36,6 +41,9 @@ public class Soul implements ModInitializer {
 		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register(new ServerStart());
 
 		//GeckoLib.initialize();
-
+//to do
+		//make Trader gui and make a proper mobs entity with no animals
+		//Soulsentity on death low health
+		//
 	}
 }

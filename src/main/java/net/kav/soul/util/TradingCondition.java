@@ -10,6 +10,17 @@ public class TradingCondition {
 
     private static boolean trading_condition;
     private static boolean closing_condition;
+    private static int tradingnum;
+
+    public static int settrading(IEntityDataSaver player,int amunt)
+    {
+        NbtCompound nbt = player.getPersistentData();
+        tradingnum= nbt.getInt("tradingnum");
+
+        tradingnum=amunt+1;
+        nbt.putInt("tradingnum",tradingnum);
+        return tradingnum;
+    }
     public static Boolean trading(IEntityDataSaver player,boolean statement)
     {
         NbtCompound nbt = player.getPersistentData();
