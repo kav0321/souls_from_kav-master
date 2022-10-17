@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.kav.soul.config.ModConfigs;
 import net.kav.soul.event.*;
+import net.kav.soul.init.JsonReaderInit;
 import net.kav.soul.item.Moditems;
 //import net.kav.soul.networking.ModMessages;
 
@@ -29,7 +30,7 @@ public class Soul implements ModInitializer {
 		Moditems.registerModItems();
 		ModConfigs.registerConfigs();
 	   ModMessages.registerC2SPackets();
-
+		JsonReaderInit.init();
 		//ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new ItemLoader());
 	Miss.Miss.register(new MissOveride());
 		ServerTickEvents.END_SERVER_TICK.register(new serverevent());

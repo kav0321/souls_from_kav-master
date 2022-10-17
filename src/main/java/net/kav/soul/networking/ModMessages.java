@@ -1,16 +1,23 @@
 package net.kav.soul.networking;
 
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kav.soul.Soul;
+import net.kav.soul.data.ItemData;
+import net.kav.soul.data.ItemLoader;
 import net.kav.soul.event.EntityDeath;
 import net.kav.soul.networking.packet.PlayerStatsServer;
 import net.kav.soul.networking.packet.TradingServer;
 import net.kav.soul.networking.packet.commandspackets;
 import net.kav.soul.util.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+
+import java.util.ArrayList;
 
 public class ModMessages {
     public static final Identifier PLAYER_SOUL = new Identifier(Soul.MOD_ID, "soul");
@@ -28,6 +35,7 @@ public class ModMessages {
     public static final Identifier STAMINA2= new Identifier(Soul.MOD_ID,"staminaa");
     public static final Identifier STA_AT_ZERO= new Identifier(Soul.MOD_ID,"sta_at_zero");
     public static final Identifier ITEM_TYPE= new Identifier(Soul.MOD_ID,"item_type");
+    public static final Identifier LIST_PACKET= new Identifier(Soul.MOD_ID,"list_packet");
     public static void registerC2SPackets(){
 
        ServerPlayNetworking.registerGlobalReceiver(ESCAPE,TradingServer::sendescapeinforeceive);
@@ -137,11 +145,100 @@ GlobalSoul.setItemtype(buf.readInt());
         });
 
 
+        ClientPlayNetworking.registerGlobalReceiver(LIST_PACKET, (client, handler, buf, sender) -> {
+            if (client.player != null) {
+                executeListPacket(buf, client.player);
+            } else {
+                PacketByteBuf newBuffer = new PacketByteBuf(Unpooled.buffer());
+                while (buf.isReadable()) {
+                    newBuffer.writeString(buf.readString());
+                }
+                client.execute(() -> {
+                    executeListPacket(newBuffer, client.player);
+                });
+            }
+        });
 
 
 
 
 
+    }
 
+
+
+    private static void executeListPacket(PacketByteBuf buf, ClientPlayerEntity player) {
+        ItemLoader.clearEveryList();
+        ArrayList<String> list = new ArrayList<>();
+        while (buf.isReadable()) {
+            list.add(buf.readString());
+        }
+        for (int i = 0; i < list.size(); i++) {
+            String listName = list.get(i).toString();
+            if (ItemData.getListNames().contains(listName)) {
+                int count = 2;
+                int negativeCount = -2;
+                if (listName.equals("minecraft:armor") || listName.equals("minecraft:tool") || listName.equals("minecraft:hoe") || listName.equals("minecraft:sword")
+                        || listName.equals("minecraft:axe") || listName.equals("minecraft:custom_block") || listName.equals("minecraft:custom_item") || listName.equals("minecraft:custom_entity"))
+                    negativeCount--;
+                if (listName.equals("minecraft:enchanting_table")) {
+                    count = 5;
+                }
+                for (int u = negativeCount; u < count; u++) {
+                    addToList(listName, list.get(i + u));
+                }
+            } else if (listName.equals("mining:level")) {
+                List<Integer> blockList = new ArrayList<>();
+                LevelLists.miningLevelList.add(Integer.parseInt(list.get(i + 1)));
+                for (int u = i + 2; u < list.size(); u++) {
+                    if (list.get(u).equals("mining:level") || list.get(u).equals("brewing:level"))
+                        break;
+                    blockList.add(Integer.parseInt(list.get(u)));
+                }
+                LevelLists.miningBlockList.add(blockList);
+            } else if (listName.equals("brewing:level")) {
+                List<Integer> brewingItemList = new ArrayList<>();
+                LevelLists.brewingLevelList.add(Integer.parseInt(list.get(i + 1)));
+                for (int u = i + 2; u < list.size(); u++) {
+                    if (list.get(u).equals("brewing:level") || list.get(u).equals("smithing:level"))
+                        break;
+                    brewingItemList.add(Integer.parseInt(list.get(u)));
+                }
+                LevelLists.brewingItemList.add(brewingItemList);
+            } else if (listName.equals("smithing:level")) {
+                List<Integer> smithingItemList = new ArrayList<>();
+                LevelLists.smithingLevelList.add(Integer.parseInt(list.get(i + 1)));
+                for (int u = i + 2; u < list.size(); u++) {
+                    if (list.get(u).equals("smithing:level") || list.get(u).equals("crafting:level"))
+                        break;
+                    smithingItemList.add(Integer.parseInt(list.get(u)));
+                }
+                LevelLists.smithingItemList.add(smithingItemList);
+            } else if (listName.equals("crafting:level")) {
+                List<Integer> craftingItemList = new ArrayList<>();
+                LevelLists.craftingLevelList.add(Integer.parseInt(list.get(i + 1)));
+                LevelLists.craftingSkillList.add(String.valueOf(list.get(i + 2)));
+                for (int u = i + 3; u < list.size(); u++) {
+                    if (list.get(u).equals("crafting:level"))
+                        break;
+                    craftingItemList.add(Integer.parseInt(list.get(u)));
+                }
+                LevelLists.craftingItemList.add(craftingItemList);
+            }
+        }
+        LevelLists.listOfAllLists.clear();
+        LevelLoader.addAllInOneList();
+        PlayerStatsManager playerStatsManager = ((PlayerStatsManagerAccess) player).getPlayerStatsManager(player);
+        player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(ConfigInit.CONFIG.healthBase + (double) playerStatsManager.getLevel("health") * ConfigInit.CONFIG.healthBonus);
+        player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)
+                .setBaseValue(ConfigInit.CONFIG.movementBase + (double) playerStatsManager.getLevel("agility") * ConfigInit.CONFIG.movementBonus);
+        player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)
+                .setBaseValue(ConfigInit.CONFIG.attackBase + (double) playerStatsManager.getLevel("strength") * ConfigInit.CONFIG.attackBonus);
+        player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR).setBaseValue(ConfigInit.CONFIG.defenseBase + (double) playerStatsManager.getLevel("defense") * ConfigInit.CONFIG.defenseBonus);
+        player.getAttributeInstance(EntityAttributes.GENERIC_LUCK).setBaseValue(ConfigInit.CONFIG.luckBase + (double) playerStatsManager.getLevel("luck") * ConfigInit.CONFIG.luckBonus);
+        PlayerStatsServerPacket.syncLockedBlockList(playerStatsManager);
+        PlayerStatsServerPacket.syncLockedBrewingItemList(playerStatsManager);
+        PlayerStatsServerPacket.syncLockedSmithingItemList(playerStatsManager);
+        PlayerStatsServerPacket.syncLockedCraftingItemList(playerStatsManager);
     }
 }

@@ -3,9 +3,12 @@ package net.kav.soul.networking.packet;
 import io.netty.buffer.Unpooled;
 import net.kav.soul.data.ItemData;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
+
+import static net.kav.soul.networking.ModMessages.LIST_PACKET;
 
 public class datapack {
 
@@ -31,7 +34,8 @@ public class datapack {
             buf.writeString("Itemsoul");
             buf.writeString(ItemData.soulnumber.get(j).toString());
         }
-
+        CustomPayloadS2CPacket packet = new CustomPayloadS2CPacket(LIST_PACKET, buf);
+        serverPlayerEntity.networkHandler.sendPacket(packet);
 
 
     }

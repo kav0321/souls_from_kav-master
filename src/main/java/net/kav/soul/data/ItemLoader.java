@@ -39,13 +39,13 @@ public class ItemLoader implements SimpleSynchronousResourceReloadListener {
                     Soul.LOGGER.error("Error occurred while loading resource {}", id.toString(), data.get("item_name").getAsString());
                 } else {
                     // Id
-                   // ItemData.ID.add(data.get("id").getAsInt());
-                  //  ItemData.ID_1_9.add(data.get("id_1_9").getAsInt());
+                    // ItemData.ID.add(data.get("id").getAsInt());
+                    //  ItemData.ID_1_9.add(data.get("id_1_9").getAsInt());
                     // Title
                     //ItemData.ItemName.add(data.get("item_name").getAsString());
                     // Level
 
-                //    ItemData.soulnumber.add(data.get("soul").getAsInt());
+                    //    ItemData.soulnumber.add(data.get("soul").getAsInt());
 
                     // Reward
                     ArrayList<Object> itemname = new ArrayList<>();
